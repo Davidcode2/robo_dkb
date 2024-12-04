@@ -108,7 +108,7 @@ class Abrechnung:
 
     def categorizeTransactions(self, transactions):
         categories = {
-            "income": [
+            "expenses": [
                 {"rent": []},
                 {"groceries": []},
                 {"travel": []},
@@ -119,7 +119,7 @@ class Abrechnung:
                 {"savings": []},
                 {"uncategorized": []},
             ],
-            "expenses": [{"salary": []}, {"payments": []}],
+            "income": [{"salary": []}, {"payments": []}],
         }
         # GPT call
         return categories

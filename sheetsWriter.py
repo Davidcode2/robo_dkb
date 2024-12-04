@@ -5,13 +5,17 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class SheetsWriter:
 
-    SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-    FINANCES_SPREADSHEET_ID = "1G_hlmv2G0YgezmmKwhiRtqoUvKiZ0AimzarYfmbY9Uc"
+    SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly", "https://www.googleapis.com/auth/spreadsheets"]
+    FINANCES_SPREADSHEET_ID = os.getenv("FINANCES_SPREADSHEET_ID")
     SHEETNAME = "GPT_categorization!"
+    SHEETNAME_TEST = "GPT_categorization!A1:B4"
     RANGE = "A:G"
 
     def writeToSheets(self):
@@ -33,7 +37,7 @@ class SheetsWriter:
         ]
         sheet.values().update(
             spreadsheetId=self.FINANCES_SPREADSHEET_ID,
-            range=str(self.SHEETNAME + "A1:B4"),
+            range=self.SHEETNAME_TEST,
             valueInputOption="USER_ENTERED",
             body={"values": mylist},
         ).execute()
@@ -55,7 +59,7 @@ class SheetsWriter:
     def readFromSheets(self, sheet):
         result = (
             sheet.values()
-            .get(spreadsheetId=self.FINANCES_SPREADSHEET_ID, range=self.SHEETNAME)
+            .get(spreadsheetId=self.FINANCES_SPREADSHEET_ID, range=self.SHEETNAME_TEST)
             .execute()
         )
         return result
