@@ -102,7 +102,6 @@ class SheetsWriter:
 
     def getSheet(self, creds):
         service = build("sheets", "v4", credentials=creds)
-        # Call the Sheets API
         sheet = service.spreadsheets()
         return sheet
 

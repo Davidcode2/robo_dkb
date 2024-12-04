@@ -3,6 +3,7 @@ import calendar
 from datetime import datetime
 from pprint import pprint
 import getpass
+from gptService import GptService
 from sheetsWriter import SheetsWriter
 
 
@@ -107,21 +108,8 @@ class Abrechnung:
         return filtered_data
 
     def categorizeTransactions(self, transactions):
-        categories = {
-            "expenses": [
-                {"rent": []},
-                {"groceries": []},
-                {"travel": []},
-                {"going_out": []},
-                {"shopping": []},
-                {"subscriptions": []},
-                {"investments": []},
-                {"savings": []},
-                {"uncategorized": []},
-            ],
-            "income": [{"salary": []}, {"payments": []}],
-        }
-        # GPT call
+        #GptService.categorize(transactions)
+        GptService().testGpt()
         return categories
 
 
