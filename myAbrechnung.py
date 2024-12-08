@@ -29,9 +29,7 @@ class Abrechnung:
                 + " - "
                 + str(self.date_range.get("date_to"))
             )
-            #print("Transactions in the specified date range: ")
             filteredTransactions = self.filterTransactionData()
-            #pprint(filteredTransactions)
             categories = self.categorizeTransactions(filteredTransactions)
             self.writeToCategoriesInSheets(categories)
 
@@ -94,7 +92,6 @@ class Abrechnung:
         filtered_data = [
             {
                 "amount": transaction.get("amount"),
-                "bdate": transaction.get("bdate"),
                 "customerreferenz": transaction.get("customerreferenz"),
                 "peer": transaction.get("peer"),
                 "postingtext": transaction.get("postingtext"),

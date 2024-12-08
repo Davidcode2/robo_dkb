@@ -39,7 +39,7 @@ class GptService:
         categories = json.dumps(Categories().__dict__, indent=4)
         print(categories)
         # GPT call
-        model = "gpt-4o-mini"
+        model = "gpt-4o"
         result = self.client.beta.chat.completions.parse(
             model=model,
             messages=[
