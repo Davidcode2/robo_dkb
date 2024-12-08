@@ -1,9 +1,16 @@
+import json
 import myAbrechnung
 import unittest
+from tests.private_transaction_data import private_transaction_data
 from tests.transactionData import transaction_test_data
 
 
 class TestAbrechnung(unittest.TestCase):
+
+    def test_transformCategories(self):
+        abrechnung = myAbrechnung.Abrechnung()
+        categories_json = json.loads(private_transaction_data.private_transaction_data)
+        abrechnung.writeToCategoriesInSheets(categories_json)
 
     def test_getDateRange_2023_01(self):
         abrechnung = myAbrechnung.Abrechnung()
@@ -55,6 +62,7 @@ class TestAbrechnung(unittest.TestCase):
         abrechnung = myAbrechnung.Abrechnung()
         abrechnung.transactions = transaction_test_data.transaction_data_2024
         self.assertEqual(abrechnung.sumTransactions(), -785.72)
+
 
 if __name__ == "__main__":
     unittest.main()

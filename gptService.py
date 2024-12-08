@@ -1,26 +1,20 @@
 import json
+import os
 from openai import OpenAI
+from models.categories import Categories
 from tests.transactionData import transaction_test_data
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class GptService:
-    client = OpenAI()
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    client = OpenAI(api_key=openai_api_key)
 
     def categorize(self, transactions):
-        categories = {
-            "expenses": [
-                {"rent": []},
-                {"groceries": []},
-                {"travel": []},
-                {"going_out": []},
-                {"shopping": []},
-                {"subscriptions": []},
-                {"investments": []},
-                {"savings": []},
-                {"uncategorized": []},
-            ],
-            "income": [{"salary": []}, {"payments": []}],
-        }
+        categories = json.dumps(Categories().__dict__, indent=4)
+        print(categories)
         # GPT call
         model = "gpt-4o-mini"
         result = self.client.chat.completions.create(
@@ -53,4 +47,5 @@ class GptService:
         print(categorized_json)
         return categorized_json
 
-#GptService().categorize(transaction_test_data.transaction_data_filtered_2024),
+
+# GptService().categorize(transaction_test_data.transaction_data_filtered_2024),

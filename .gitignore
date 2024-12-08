@@ -6,3 +6,4 @@ credentials.json
 token.json
 token*
 __pycache__/
+tests/private*

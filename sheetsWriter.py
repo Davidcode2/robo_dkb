@@ -5,28 +5,90 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from contextlib import contextmanager
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
+def singleton(cls):
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+
+@singleton
 class SheetsWriter:
 
-    SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly", "https://www.googleapis.com/auth/spreadsheets"]
+    SCOPES = [
+        "https://www.googleapis.com/auth/spreadsheets.readonly",
+        "https://www.googleapis.com/auth/spreadsheets",
+    ]
     FINANCES_SPREADSHEET_ID = os.getenv("FINANCES_SPREADSHEET_ID")
     SHEETNAME = "GPT_categorization!"
     SHEETNAME_TEST = "GPT_categorization!A1:B4"
     RANGE = "A:G"
 
+
+    def __init__(self):
+        self.sheet = None
+        self.sheet = self.getSheet(self.authorizeWithSheets())
+
     def writeToSheets(self, categories):
         # Write to Google Sheets
-        creds = self.authorizeWithSheets()
-        sheet = self.getSheet(creds)
-        result = self.readFromSheets(sheet)
-        #self.testWriteToSheets(sheet)
-        self.write(sheet, categories)
+        result = self.readFromSheets(self.sheet)
+        # self.testWriteToSheets(sheet)
+        self.write(self.sheet, categories)
         self.showResult(result)
         pass
+
+    def writeToCell(self, sheet_name, values):
+        value_ = [[value] for value in values]
+        column = self.column_number_to_letter(self.get_last_column(sheet_name))
+        start_row = 5
+        range = column + str(start_row) + ":" + column
+        print(range)
+        self.sheet.values().update(
+            spreadsheetId=self.FINANCES_SPREADSHEET_ID,
+            range=str(sheet_name + range),
+            valueInputOption="USER_ENTERED",
+            body={"values": value_},
+        ).execute()
+
+    def column_number_to_letter(self, column_number):
+        """Convert a column number to a column letter (e.g., 1 -> A, 27 -> AA)."""
+        column_letter = ""
+        while column_number > 0:
+            column_number -= 1
+            column_letter = chr(column_number % 26 + 65) + column_letter
+            column_number //= 26
+        return column_letter
+
+    def get_last_column(self, sheet_name):
+        # Define the range (entire sheet or a specific area)
+        result = (
+            self.sheet.values()
+            .get(
+                spreadsheetId=self.FINANCES_SPREADSHEET_ID,
+                range=str(sheet_name + "A:Z"),
+            )
+            .execute()
+        )
+        values = result.get("values", [])
+
+        # Determine the last column
+        last_column = 0
+        for row in values:
+            if len(row) > last_column:
+                last_column = len(row)
+        first_empty_column = last_column + 1
+        return first_empty_column
 
     def testWriteToSheets(self, sheet):
         mylist = [
@@ -100,7 +162,25 @@ class SheetsWriter:
                 token.write(creds.to_json())
         return creds
 
-    def getSheet(self, creds):
+    @contextmanager
+    def sheets_service(self, creds):
         service = build("sheets", "v4", credentials=creds)
-        sheet = service.spreadsheets()
-        return sheet
+        try:
+            yield service.spreadsheets()
+        finally:
+            if hasattr(service._http, "close"):
+                service._http.close()
+
+    def getSheet(self, creds):
+        with self.sheets_service(creds) as service:
+            return service
+
+    def __enter__(self):
+        # Return self to allow usage in a context manager
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # Clean up resources (if any)
+        if hasattr(self.sheet, "close"):
+            self.sheet.close()
+        print("SheetsWriter resources have been cleaned up.")
