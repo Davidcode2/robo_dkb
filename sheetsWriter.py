@@ -38,11 +38,11 @@ class SheetsWriter:
         self.sheet = self.getSheet(self.authorizeWithSheets())
 
     def writeToCell(self, sheet_name, values):
+        print(f"Writing {values} to sheet {sheet_name}")
         value_ = [[value] for value in values]
         column = self.column_number_to_letter(self.get_last_column(sheet_name))
         start_row = 5
         range = column + str(start_row) + ":" + column
-        print(range)
         self.sheet.values().update(
             spreadsheetId=self.FINANCES_SPREADSHEET_ID,
             range=str(sheet_name + range),

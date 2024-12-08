@@ -1,7 +1,6 @@
 from dkb_robo import DKBRobo
 import calendar
 from datetime import datetime
-from pprint import pprint
 import getpass
 from gptService import GptService
 from sheetsWriter import SheetsWriter
@@ -21,22 +20,20 @@ class Abrechnung:
         ) as dkb:
             self.dkb = dkb
             print("Successfully logged in")
-            transactions = self.getTransactionsInDateRange(
-                self.getDateRange(month=month)
-            )
+            self.date_range = self.getDateRange(month=month)
+            transactions = self.getTransactionsInDateRange(self.date_range)
             self.transactions: list[dict[str, str]] = transactions
             print(
                 "Date range: "
-                + str(self.getDateRange().get("date_from"))
+                + str(self.date_range.get("date_from"))
                 + " - "
-                + str(self.getDateRange().get("date_to"))
+                + str(self.date_range.get("date_to"))
             )
-            print("Transactions in the specified date range: ")
+            #print("Transactions in the specified date range: ")
             filteredTransactions = self.filterTransactionData()
-            pprint(filteredTransactions)
+            #pprint(filteredTransactions)
             categories = self.categorizeTransactions(filteredTransactions)
             self.writeToCategoriesInSheets(categories)
-            #SheetsWriter().writeToSheets(categories)
 
     def getDateRange(self, month=None, year=None):
         startDate = self.getStartDate(month, year)
@@ -74,7 +71,6 @@ class Abrechnung:
 
     def getGiroAccount(self):
         giro_account = self.dkb.account_dic.get(0)
-        pprint(giro_account)
         if giro_account == None:
             print("No giro account found")
             exit(1)
@@ -121,7 +117,6 @@ class Abrechnung:
             rent = expenses.get("rent")
             writer.writeToCell("GPT_categorization!", rent)
             groceries = expenses.get("groceries")
-            print(groceries)
             writer.writeToCell("Lebensmittel!", groceries)
             shopping = expenses.get("shopping")
             writer.writeToCell("GPT_categorization!", shopping)
