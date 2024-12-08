@@ -4,7 +4,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from contextlib import contextmanager
 
 from dotenv import load_dotenv
@@ -31,22 +30,12 @@ class SheetsWriter:
         "https://www.googleapis.com/auth/spreadsheets",
     ]
     FINANCES_SPREADSHEET_ID = os.getenv("FINANCES_SPREADSHEET_ID")
-    SHEETNAME = "GPT_categorization!"
     SHEETNAME_TEST = "GPT_categorization!A1:B4"
-    RANGE = "A:G"
 
 
     def __init__(self):
         self.sheet = None
         self.sheet = self.getSheet(self.authorizeWithSheets())
-
-    def writeToSheets(self, categories):
-        # Write to Google Sheets
-        result = self.readFromSheets(self.sheet)
-        # self.testWriteToSheets(sheet)
-        self.write(self.sheet, categories)
-        self.showResult(result)
-        pass
 
     def writeToCell(self, sheet_name, values):
         value_ = [[value] for value in values]
@@ -103,43 +92,6 @@ class SheetsWriter:
             valueInputOption="USER_ENTERED",
             body={"values": mylist},
         ).execute()
-
-    def write(self, sheet, categories):
-        body = {"values": categories}
-        result = (
-            sheet.values()
-            .update(
-                spreadsheetId=self.FINANCES_SPREADSHEET_ID,
-                range=str(self.SHEETNAME + self.RANGE),
-                valueInputOption="USER_ENTERED",
-                body=body,
-            )
-            .execute()
-        )
-        return result
-
-    def readFromSheets(self, sheet):
-        result = (
-            sheet.values()
-            .get(spreadsheetId=self.FINANCES_SPREADSHEET_ID, range=self.SHEETNAME_TEST)
-            .execute()
-        )
-        return result
-
-    def showResult(self, result):
-        try:
-            values = result.get("values", [])
-
-            if not values:
-                print("No data found.")
-                return
-
-            print("Name, Major:")
-            for row in values:
-                # Print columns A and E, which correspond to indices 0 and 4.
-                print(f"{row[0]}, {row[1]}")
-        except HttpError as err:
-            print(err)
 
     def authorizeWithSheets(self):
         creds = None
