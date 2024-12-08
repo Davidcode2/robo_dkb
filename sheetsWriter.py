@@ -18,13 +18,13 @@ class SheetsWriter:
     SHEETNAME_TEST = "GPT_categorization!A1:B4"
     RANGE = "A:G"
 
-    def writeToSheets(self):
+    def writeToSheets(self, categories):
         # Write to Google Sheets
         creds = self.authorizeWithSheets()
         sheet = self.getSheet(creds)
         result = self.readFromSheets(sheet)
-        self.testWriteToSheets(sheet)
-        #self.write(sheet, categories)
+        #self.testWriteToSheets(sheet)
+        self.write(sheet, categories)
         self.showResult(result)
         pass
 
@@ -104,5 +104,3 @@ class SheetsWriter:
         service = build("sheets", "v4", credentials=creds)
         sheet = service.spreadsheets()
         return sheet
-
-SheetsWriter().writeToSheets()

@@ -56,6 +56,5 @@ class TestAbrechnung(unittest.TestCase):
         abrechnung.transactions = transaction_test_data.transaction_data_2024
         self.assertEqual(abrechnung.sumTransactions(), -785.72)
 
-
 if __name__ == "__main__":
     unittest.main()

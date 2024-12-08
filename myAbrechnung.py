@@ -35,7 +35,8 @@ class Abrechnung:
             filteredTransactions = self.filterTransactionData()
             pprint(filteredTransactions)
             categories = self.categorizeTransactions(filteredTransactions)
-            SheetsWriter.writeToSheets(categories)
+            categoriesArray = self.transformCategoriesToArray(categories)
+            SheetsWriter().writeToSheets(categories)
 
     def getDateRange(self, month=None, year=None):
         startDate = self.getStartDate(month, year)
@@ -108,10 +109,17 @@ class Abrechnung:
         return filtered_data
 
     def categorizeTransactions(self, transactions):
-        #GptService.categorize(transactions)
-        GptService().testGpt()
+        categories = GptService().categorize(transactions)
         return categories
 
+    def transformCategoriesToArray(self, categories):
+        # extract categories from JSON
+        # write them to the appropriate cell in google sheet
+        categoriesArray = []
+        for category in categories:
+            for key, value in category.items():
+                categoriesArray.append({key: value})
+        return categories
 
 if __name__ == "__main__":
     Abrechnung().start()
