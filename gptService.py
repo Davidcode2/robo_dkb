@@ -36,9 +36,6 @@ class GptService:
     client = OpenAI(api_key=openai_api_key)
 
     def categorize(self, transactions):
-        categories = json.dumps(Categories().__dict__, indent=4)
-        print(categories)
-        # GPT call
         model = "gpt-4o"
         result = self.client.beta.chat.completions.parse(
             model=model,
@@ -73,8 +70,10 @@ class GptService:
             ],
             response_format=Category,
         )
+        print("GPT Result:\n")
         print(result)
         categorized_json = json.loads(str(result.choices[0].message.content))
+        print("Categorized:\n")
         print(categorized_json)
         return categorized_json
 

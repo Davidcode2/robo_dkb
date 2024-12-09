@@ -32,23 +32,48 @@ class SheetsWriter:
     FINANCES_SPREADSHEET_ID = os.getenv("FINANCES_SPREADSHEET_ID")
     SHEETNAME_TEST = "GPT_categorization!A1:B4"
 
-
-    def __init__(self):
+    def __init__(self, start_date):
         self.sheet = None
         self.sheet = self.getSheet(self.authorizeWithSheets())
+        self.start_date = start_date
 
-    def writeToCell(self, sheet_name, values):
+    def write(self, sheet_name, values):
         print(f"Writing {values} to sheet {sheet_name}")
+        start_row = self.get_last_row(sheet_name)
+        self.writeHeaders(sheet_name, start_row)
+        self.writeValues(start_row, sheet_name, values)
+
+    def writeValues(self, start_row, sheet_name, values):
         row_values = [values]
         column = "C"
-        start_row = self.get_last_row(sheet_name)
-        range = column + str(start_row) + ":" + str(start_row)
+        cell_range = column + str(start_row) + ":" + str(start_row)
+        self.execute_update_sheet(str(sheet_name + cell_range), row_values)
+
+    def writeHeaders(self, sheet_name, start_row):
+        column = "A"
+        end_column = "B"
+        date_header = self.createDateHeader(self.start_date)
+        sum_formula = self.createSumFormula(start_row)
+        headers = [[date_header, sum_formula]]
+        cell_range = f"{column}{str(start_row)}:{end_column}{str(start_row)}"
+        self.execute_update_sheet(str(sheet_name + cell_range), headers)
+
+    def execute_update_sheet(self, sheet_range, values):
         self.sheet.values().update(
             spreadsheetId=self.FINANCES_SPREADSHEET_ID,
-            range=str(sheet_name + range),
+            range=str(sheet_range),
             valueInputOption="USER_ENTERED",
-            body={"values": row_values},
+            body={"values": values},
         ).execute()
+
+    def createDateHeader(self, start_date):
+        yearAndMonth = start_date.strftime("%Y %B")
+        return yearAndMonth
+
+    def createSumFormula(self, start_row):
+        start_column = "C"
+        sumFormula = f"=SUM({start_column}{start_row}:{start_row})"
+        return sumFormula
 
     def arrayToColumn(self, values):
         column_values = [[value] for value in values]

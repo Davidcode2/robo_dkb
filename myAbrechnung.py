@@ -8,9 +8,9 @@ from sheetsWriter import SheetsWriter
 
 class Abrechnung:
     def start(self):
+        month = int(input("Enter month as integer between 1 and 12: "))
         username = input("Enter username: ")
         password = getpass.getpass("Enter password: ")
-        month = int(input("Enter month as integer between 1 and 12: "))
         with DKBRobo(
             dkb_user=username,
             dkb_password=password,
@@ -36,6 +36,7 @@ class Abrechnung:
     def getDateRange(self, month=None, year=None):
         startDate = self.getStartDate(month, year)
         endDate = self.getEndDate(startDate)
+        self.start_date_raw = startDate
         return {
             "date_from": startDate.strftime("%d.%m.%Y"),
             "date_to": endDate.strftime("%d.%m.%Y"),
@@ -108,19 +109,21 @@ class Abrechnung:
     def writeToCategoriesInSheets(self, categories):
         # extract categories from JSON
         # write them to the appropriate cell in google sheet
-        writer = SheetsWriter()
+        writer = SheetsWriter(start_date=self.start_date_raw)
+        print("\n")
         with writer:
             expenses = categories.get("expenses")
             groceries = expenses.get("groceries")
-            writer.writeToCell("Lebensmittel!", groceries)
+            writer.write("Lebensmittel!", groceries)
             travel = expenses.get("travel")
-            writer.writeToCell("Reisen!", travel)
+            writer.write("Reisen!", travel)
             going_out = expenses.get("going_out")
-            writer.writeToCell("Ausgehen!", going_out)
+            writer.write("Ausgehen!", going_out)
             shopping = expenses.get("shopping")
-            writer.writeToCell("Shopping!", shopping)
+            writer.write("Shopping!", shopping)
             uncategorized = expenses.get("uncategorized")
-            writer.writeToCell("Uncategorized!", uncategorized)
+            writer.write("Uncategorized!", uncategorized)
+
 
 if __name__ == "__main__":
     Abrechnung().start()
