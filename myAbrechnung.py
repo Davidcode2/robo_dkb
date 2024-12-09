@@ -111,16 +111,16 @@ class Abrechnung:
         writer = SheetsWriter()
         with writer:
             expenses = categories.get("expenses")
-            rent = expenses.get("rent")
-            writer.writeToCell("GPT_categorization!", rent)
             groceries = expenses.get("groceries")
             writer.writeToCell("Lebensmittel!", groceries)
-            shopping = expenses.get("shopping")
-            writer.writeToCell("GPT_categorization!", shopping)
             travel = expenses.get("travel")
             writer.writeToCell("Reisen!", travel)
             going_out = expenses.get("going_out")
             writer.writeToCell("Ausgehen!", going_out)
+            shopping = expenses.get("shopping")
+            writer.writeToCell("Shopping!", shopping)
+            uncategorized = expenses.get("uncategorized")
+            writer.writeToCell("Uncategorized!", uncategorized)
 
 if __name__ == "__main__":
     Abrechnung().start()

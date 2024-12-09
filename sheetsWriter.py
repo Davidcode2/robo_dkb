@@ -39,16 +39,20 @@ class SheetsWriter:
 
     def writeToCell(self, sheet_name, values):
         print(f"Writing {values} to sheet {sheet_name}")
-        value_ = [[value] for value in values]
-        column = self.column_number_to_letter(self.get_last_column(sheet_name))
-        start_row = 5
-        range = column + str(start_row) + ":" + column
+        row_values = [values]
+        column = "C"
+        start_row = self.get_last_row(sheet_name)
+        range = column + str(start_row) + ":" + str(start_row)
         self.sheet.values().update(
             spreadsheetId=self.FINANCES_SPREADSHEET_ID,
             range=str(sheet_name + range),
             valueInputOption="USER_ENTERED",
-            body={"values": value_},
+            body={"values": row_values},
         ).execute()
+
+    def arrayToColumn(self, values):
+        column_values = [[value] for value in values]
+        return column_values
 
     def column_number_to_letter(self, column_number):
         """Convert a column number to a column letter (e.g., 1 -> A, 27 -> AA)."""
@@ -59,8 +63,21 @@ class SheetsWriter:
             column_number //= 26
         return column_letter
 
+    def get_last_row(self, sheet_name):
+        result = (
+            self.sheet.values()
+            .get(
+                spreadsheetId=self.FINANCES_SPREADSHEET_ID,
+                range=str(sheet_name + "A:Z"),
+            )
+            .execute()
+        )
+        values = result.get("values", [])
+        row = len(values)
+        first_empty_row = row + 1
+        return first_empty_row
+
     def get_last_column(self, sheet_name):
-        # Define the range (entire sheet or a specific area)
         result = (
             self.sheet.values()
             .get(
