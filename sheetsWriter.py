@@ -37,15 +37,32 @@ class SheetsWriter:
         self.sheet = self.getSheet(self.authorizeWithSheets())
         self.start_date = start_date
 
+    def writeTotal(self, sheet_name, expenses, income, invest, start_date=None):
+        print(f"Writing expenses ({round(expenses, 2)}) and income ({round(income, 2)}) to sheet {sheet_name}")
+        start_row = self.get_last_row(sheet_name)
+        self.writeMonth(sheet_name, start_row, start_date)
+        self.writeValues(start_row, sheet_name, [expenses], "B")
+        self.writeValues(start_row, sheet_name, [income], "C")
+        self.writeValues(start_row, sheet_name, [invest], "D")
+
+    def writeMonth(self, sheet_name, start_row, start_date=None):
+        column = "A"
+        if (start_date is None):
+            date_header = self.createDateHeader(self.start_date)
+        else:
+            date_header = self.createDateHeader(start_date)
+        headers = [[date_header]]
+        cell_range = f"{column}{str(start_row)}"
+        self.execute_update_sheet(str(sheet_name + cell_range), headers)
+
     def write(self, sheet_name, values):
         print(f"Writing {values} to sheet {sheet_name}")
         start_row = self.get_last_row(sheet_name)
         self.writeHeaders(sheet_name, start_row)
         self.writeValues(start_row, sheet_name, values)
 
-    def writeValues(self, start_row, sheet_name, values):
+    def writeValues(self, start_row, sheet_name, values, column = "C"):
         row_values = [values]
-        column = "C"
         cell_range = column + str(start_row) + ":" + str(start_row)
         self.execute_update_sheet(str(sheet_name + cell_range), row_values)
 
